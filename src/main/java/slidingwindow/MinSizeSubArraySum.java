@@ -1,4 +1,4 @@
-package array.slidingwindow;
+package slidingwindow;
 
 public class MinSizeSubArraySum {
 

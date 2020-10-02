@@ -1,4 +1,4 @@
-package array.twopointers;
+package twopointers;
 
 /*
 Minimum Window Sort (medium) #

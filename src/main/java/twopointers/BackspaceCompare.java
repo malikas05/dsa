@@ -1,4 +1,4 @@
-package array.twopointers;
+package twopointers;
 
 /*
 Comparing Strings containing Backspaces (medium) #
