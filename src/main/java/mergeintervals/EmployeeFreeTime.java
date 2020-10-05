@@ -1,8 +1,6 @@
 package mergeintervals;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /*
 Employee Free Time (hard) #
@@ -24,13 +22,18 @@ Example 3:
 Input: Employee Working Hours=[[[1,3]], [[2,4]], [[3,5], [7,9]]]
 Output: [5,7]
 Explanation: All employess are free between [5,7].
+
+Example 4:
+Input: Employee Working Hours=[[[1,3], [5,6], [10,12], [14,16]], [[2,3],[6,8]]]
+Output: [5,7]
+Explanation: All employess are free between [5,7].
  */
 public class EmployeeFreeTime {
     public static void main(String[] args) {
         List<List<Interval>> input = new ArrayList<>();
         input.add(new ArrayList<>(Arrays.asList(new Interval(1, 3), new Interval(5, 6))));
         input.add(new ArrayList<>(Arrays.asList(new Interval(2, 3), new Interval(6, 8))));
-        List<Interval> result = EmployeeFreeTime.findEmployeeFreeTime(input);
+        List<Interval> result = EmployeeFreeTime.findEmployeeFreeTime3(input);
         System.out.print("Free intervals: ");
         for (Interval interval : result)
             System.out.print("[" + interval.start + ", " + interval.end + "] ");
@@ -40,7 +43,7 @@ public class EmployeeFreeTime {
         input.add(new ArrayList<>(Arrays.asList(new Interval(1, 3), new Interval(9, 12))));
         input.add(new ArrayList<>(Arrays.asList(new Interval(2, 4))));
         input.add(new ArrayList<>(Arrays.asList(new Interval(6, 8))));
-        result = EmployeeFreeTime.findEmployeeFreeTime(input);
+        result = EmployeeFreeTime.findEmployeeFreeTime3(input);
         System.out.print("Free intervals: ");
         for (Interval interval : result)
             System.out.print("[" + interval.start + ", " + interval.end + "] ");
@@ -50,7 +53,7 @@ public class EmployeeFreeTime {
         input.add(new ArrayList<>(Arrays.asList(new Interval(1, 3))));
         input.add(new ArrayList<>(Arrays.asList(new Interval(2, 4))));
         input.add(new ArrayList<>(Arrays.asList(new Interval(3, 5), new Interval(7, 9))));
-        result = EmployeeFreeTime.findEmployeeFreeTime(input);
+        result = EmployeeFreeTime.findEmployeeFreeTime3(input);
         System.out.print("Free intervals: ");
         for (Interval interval : result)
             System.out.print("[" + interval.start + ", " + interval.end + "] ");
@@ -59,18 +62,23 @@ public class EmployeeFreeTime {
         input = new ArrayList<>();
         input.add(new ArrayList<>(Arrays.asList(new Interval(1, 3), new Interval(5, 6), new Interval(10, 12), new Interval(14,16))));
         input.add(new ArrayList<>(Arrays.asList(new Interval(2, 3), new Interval(6,8))));
-        result = EmployeeFreeTime.findEmployeeFreeTime(input);
+        result = EmployeeFreeTime.findEmployeeFreeTime3(input);
         System.out.print("Free intervals: ");
         for (Interval interval : result)
             System.out.print("[" + interval.start + ", " + interval.end + "] ");
     }
 
+    /*
+    - Complexity Analysis:
+    Time complexity: O(N)
+    Space complexity: O(N)
+    */
     public static List<Interval> findEmployeeFreeTime(List<List<Interval>> schedule) {
         if (schedule == null || schedule.size() == 0)
             return null;
 
         List<Interval> result = new ArrayList<>();
-        List<List<Interval>> freeSchedule = new ArrayList<>();
+        List<List<Interval>> freeScheduleForAllEmployees = new ArrayList<>();
         int maxFreeScheduleSize = 0;
         int startHour = Integer.MAX_VALUE, finishHour = 0;
 
@@ -82,28 +90,28 @@ public class EmployeeFreeTime {
         }
 
         for (int k = 0; k < schedule.size(); k++) {
-            List<Interval> singleSchedule = schedule.get(k);
-            List<Interval> freeSingleSchedule = new ArrayList<>();
+            List<Interval> employeeSchedule = schedule.get(k);
+            List<Interval> employeeFreeSchedule = new ArrayList<>();
 
-            if (singleSchedule.get(0).start > startHour)
-                freeSingleSchedule.add(new Interval(startHour, singleSchedule.get(0).start));
-            for (int i = 1; i < singleSchedule.size(); i++) {
-                if (singleSchedule.get(i).start > singleSchedule.get(i - 1).end) {
-                    freeSingleSchedule.add(new Interval(singleSchedule.get(i - 1).end, singleSchedule.get(i).start));
+            if (employeeSchedule.get(0).start > startHour)
+                employeeFreeSchedule.add(new Interval(startHour, employeeSchedule.get(0).start));
+            for (int i = 1; i < employeeSchedule.size(); i++) {
+                if (employeeSchedule.get(i).start > employeeSchedule.get(i - 1).end) {
+                    employeeFreeSchedule.add(new Interval(employeeSchedule.get(i - 1).end, employeeSchedule.get(i).start));
                 }
             }
 
-            if (singleSchedule.get(singleSchedule.size() - 1).end < finishHour)
-                freeSingleSchedule.add(new Interval(singleSchedule.get(singleSchedule.size() - 1).end, finishHour));
+            if (employeeSchedule.get(employeeSchedule.size() - 1).end < finishHour)
+                employeeFreeSchedule.add(new Interval(employeeSchedule.get(employeeSchedule.size() - 1).end, finishHour));
 
-            freeSchedule.add(freeSingleSchedule);
-            maxFreeScheduleSize = Math.max(maxFreeScheduleSize, freeSingleSchedule.size());
+            freeScheduleForAllEmployees.add(employeeFreeSchedule);
+            maxFreeScheduleSize = Math.max(maxFreeScheduleSize, employeeFreeSchedule.size());
         }
 
         int i = 0;
         while (i < maxFreeScheduleSize) {
             Interval freeInterval = new Interval(0, 24);
-            for (List<Interval> intervals : freeSchedule) {
+            for (List<Interval> intervals : freeScheduleForAllEmployees) {
                 if (intervals.size() > i) {
                     freeInterval.start = Math.max(intervals.get(i).start, freeInterval.start);
                     freeInterval.end = Math.min(intervals.get(i).end, freeInterval.end);
@@ -117,6 +125,69 @@ public class EmployeeFreeTime {
         return result;
     }
 
+    /*
+    - Complexity Analysis:
+    Time complexity: O(N log(N)) - for sorting
+    Space complexity: O(N) - for sorting
+    */
+    public static List<Interval> findEmployeeFreeTime2(List<List<Interval>> schedule) {
+        if (schedule == null || schedule.size() == 0)
+            return null;
+
+        List<Interval> allSchedules = new ArrayList<>();
+        for (List<Interval> employeeSchedule : schedule) {
+            allSchedules.addAll(employeeSchedule);
+        }
+
+        Collections.sort(allSchedules, Comparator.comparingInt(Interval::getStart));
+        List<Interval> freeSchedules = new ArrayList<>();
+
+        Iterator<Interval> intervalIterator = allSchedules.iterator();
+        Interval prevInterval = intervalIterator.next();
+        while (intervalIterator.hasNext()) {
+            Interval currentInterval = intervalIterator.next();
+            if (prevInterval.end < currentInterval.start)
+                freeSchedules.add(new Interval(prevInterval.end, currentInterval.start));
+
+            prevInterval = currentInterval;
+        }
+
+        return freeSchedules;
+    }
+
+    /*
+    - Complexity Analysis:
+    Time complexity: O(N log(K)) where N - number of intervals and K - number of employees. We store no more than K elements in the heap at any given time.
+    Space complexity: O(K) - for minHeap
+    */
+    public static List<Interval> findEmployeeFreeTime3(List<List<Interval>> schedule) {
+        if (schedule == null || schedule.size() == 0)
+            return null;
+
+        List<Interval> result = new ArrayList<>();
+        PriorityQueue<Employee> minHeap = new PriorityQueue<>(Comparator.comparingInt(employee -> employee.interval.start));
+        for (int i = 0; i < schedule.size(); i++) {
+            minHeap.offer(new Employee(schedule.get(i).get(0), i, 0));
+        }
+
+        Interval previousInterval = minHeap.peek().interval;
+        while (!minHeap.isEmpty()) {
+            Employee topElem = minHeap.poll();
+            if (previousInterval.end < topElem.interval.start) {
+                result.add(new Interval(previousInterval.end, topElem.interval.start));
+                previousInterval = topElem.interval;
+            } else if (previousInterval.end < topElem.interval.end) {
+                previousInterval = topElem.interval;
+            }
+
+            if (schedule.get(topElem.employeeId).size() > topElem.intervalIndex + 1) {
+                minHeap.offer(new Employee(schedule.get(topElem.employeeId).get(topElem.intervalIndex + 1), topElem.employeeId, topElem.intervalIndex + 1));
+            }
+        }
+
+        return result;
+    }
+
     private static class Interval {
         private int start;
         private int end;
@@ -124,6 +195,26 @@ public class EmployeeFreeTime {
         public Interval(int start, int end) {
             this.start = start;
             this.end = end;
+        }
+
+        public int getStart() {
+            return start;
+        }
+
+        public int getEnd() {
+            return end;
+        }
+    }
+
+    private static class Employee {
+        private Interval interval;
+        private int employeeId;
+        private int intervalIndex;
+
+        public Employee(Interval interval, int employeeId, int intervalIndex) {
+            this.interval = interval;
+            this.employeeId = employeeId;
+            this.intervalIndex = intervalIndex;
         }
     }
 }
